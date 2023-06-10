@@ -27,11 +27,16 @@ async function run() {
         await client.connect();
 
         const classesCollection = client.db('fluencyDb').collection('classes');
+        const instructorsCollection = client.db('fluencyDb').collection('instructors');
 
         app.get('/classes', async (req, res) => {
             const result = await classesCollection.find().toArray();
             res.send(result);
-        })
+        });
+        app.get('/instructors', async (req, res) => {
+            const result = await instructorsCollection.find().toArray();
+            res.send(result);
+        });
 
 
         // Send a ping to confirm a successful connection
