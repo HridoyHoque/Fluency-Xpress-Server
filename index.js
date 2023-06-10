@@ -28,15 +28,30 @@ async function run() {
 
         const classesCollection = client.db('fluencyDb').collection('classes');
         const instructorsCollection = client.db('fluencyDb').collection('instructors');
+        const usersCollection = client.db('fluencyDb').collection('users');
 
+        // get all classes data
         app.get('/classes', async (req, res) => {
             const result = await classesCollection.find().toArray();
             res.send(result);
         });
+        // get all instructors information
         app.get('/instructors', async (req, res) => {
             const result = await instructorsCollection.find().toArray();
             res.send(result);
         });
+        // save users email and role in database
+        app.put('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = req.body;
+            const query = { email: email  }
+            const options = {upsert: true}
+            const updateDoc = {
+                $set: user,
+            }
+            const result = await usersCollection.updateOne(query, updateDoc, options)
+            res.send(result);
+        })
 
 
         // Send a ping to confirm a successful connection
