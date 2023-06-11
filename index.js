@@ -27,6 +27,7 @@ async function run() {
         await client.connect();
 
         const classesCollection = client.db('fluencyDb').collection('classes');
+        const newClassesCollection = client.db('fluencyDb').collection('newClasses');
         const instructorsCollection = client.db('fluencyDb').collection('instructors');
         const usersCollection = client.db('fluencyDb').collection('users');
 
@@ -89,6 +90,12 @@ async function run() {
             res.send(result);
         })
 
+        // store newClasses data to db
+       app.post('/newClasses', async(req, res) => {
+        const newClass = req.body;
+        const result = await newClassesCollection.insertOne(newClass)
+        res.send(result);
+       })
 
 
         // Send a ping to confirm a successful connection
