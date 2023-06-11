@@ -52,8 +52,8 @@ async function run() {
             const result = await usersCollection.find().toArray();
             res.send(result);
         })
-         // save users email and role in database
-         app.put('/users/:email', async (req, res) => {
+        // save users email and role in database
+        app.put('/users/:email', async (req, res) => {
             const email = req.params.email;
             const user = req.body;
             const query = { email: email }
@@ -67,10 +67,22 @@ async function run() {
         // make user to admin
         app.patch('/users/admin/:id', async (req, res) => {
             const id = req.params.id;
-            const filter = {_id: new ObjectId(id)};
+            const filter = { _id: new ObjectId(id) };
             const updateDoc = {
                 $set: {
                     role: 'admin'
+                },
+            }
+            const result = await usersCollection.updateOne(filter, updateDoc)
+            res.send(result);
+        })
+        // make user to instructor 
+        app.patch('/users/instructor/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    role: 'instructor'
                 },
             }
             const result = await usersCollection.updateOne(filter, updateDoc)
