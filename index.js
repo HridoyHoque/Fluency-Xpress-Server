@@ -115,8 +115,7 @@ async function run() {
             res.send(result);
         })
 
-        // get logged instructor classes informationa
-
+        // get logged instructor classes information
        app.get('/newClasses', async (req, res) => {
         let query = {};
         if(req.query?.email){
@@ -125,6 +124,17 @@ async function run() {
         const result = await newClassesCollection.find(query).toArray();
         res.send(result);
        })
+        // get logged students classes information
+       app.get('/selectedClasses', async (req, res) => {
+        let query = {};
+        if(req.query?.email){
+            query = {email: req.query.email}
+        }
+        const result = await selectedClassesCollection.find(query).toArray();
+        res.send(result);
+       })
+
+
         // Send feedback to instructor 
         app.patch('/newClasses/feedback/:id', async (req, res) => {
             const id = req.params.id;
