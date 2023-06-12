@@ -133,6 +133,13 @@ async function run() {
         const result = await selectedClassesCollection.find(query).toArray();
         res.send(result);
        })
+        //  delete my My selected data
+        app.delete("/selectedClasses/:id", async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)};
+            const result = await selectedClassesCollection.deleteOne(query);
+            res.send(result);
+        })
 
 
         // Send feedback to instructor 
