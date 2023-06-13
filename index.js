@@ -2,13 +2,14 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 require('dotenv').config()
+const stripe = require('stripe')(process.env.PAYMENT_SECRET_KEY)
 const port = process.env.PORT || 5000;
 
 // middleware
 app.use(cors());
 app.use(express.json());
 
-
+console.log(process.env.PAYMENT_SECRET_KEY)
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.mucefdr.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -31,6 +32,7 @@ async function run() {
         const selectedClassesCollection = client.db('fluencyDb').collection('selectedClasses');
         const instructorsCollection = client.db('fluencyDb').collection('instructors');
         const usersCollection = client.db('fluencyDb').collection('users');
+        const paymentCollection = client.db('fluencyDb').collection('payments');
 
         // get all classes data
         app.get('/classes', async (req, res) => {
@@ -116,27 +118,27 @@ async function run() {
         })
 
         // get logged instructor classes information
-       app.get('/newClasses', async (req, res) => {
-        let query = {};
-        if(req.query?.email){
-            query = {email: req.query.email}
-        }
-        const result = await newClassesCollection.find(query).toArray();
-        res.send(result);
-       })
+        app.get('/newClasses', async (req, res) => {
+            let query = {};
+            if (req.query?.email) {
+                query = { email: req.query.email }
+            }
+            const result = await newClassesCollection.find(query).toArray();
+            res.send(result);
+        })
         // get logged students classes information
-       app.get('/selectedClasses', async (req, res) => {
-        let query = {};
-        if(req.query?.email){
-            query = {email: req.query.email}
-        }
-        const result = await selectedClassesCollection.find(query).toArray();
-        res.send(result);
-       })
+        app.get('/selectedClasses', async (req, res) => {
+            let query = {};
+            if (req.query?.email) {
+                query = { email: req.query.email }
+            }
+            const result = await selectedClassesCollection.find(query).toArray();
+            res.send(result);
+        })
         //  delete my My selected data
-        app.delete("/selectedClasses/:id", async(req, res) => {
+        app.delete("/selectedClasses/:id", async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
             const result = await selectedClassesCollection.deleteOne(query);
             res.send(result);
         })
@@ -163,19 +165,38 @@ async function run() {
         })
 
         // store newClasses data to db
-       app.post('/newClasses', async(req, res) => {
-        const newClass = req.body;
-        const result = await newClassesCollection.insertOne(newClass)
-        res.send(result);
-       })
+        app.post('/newClasses', async (req, res) => {
+            const newClass = req.body;
+            const result = await newClassesCollection.insertOne(newClass)
+            res.send(result);
+        })
 
+        //    save selectedClasses data to db
+        app.post('/selectedClasses', async (req, res) => {
+            const selectedClass = req.body;
+            const result = await selectedClassesCollection.insertOne(selectedClass);
+            res.send(result);
+        });
+        // create payment intent
+        app.post('/create-payment-intent', async (req, res) => {
+            const { price } = req.body;
+            const amount = parseInt(price * 100);
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card']
+            });
+            res.send({
+                clientSecret: paymentIntent.client_secret
+            })
+        })
 
-    //    save selectedClasses data to db
-    app.post('/selectedClasses', async(req, res) => {
-        const selectedClass = req.body;
-        const result = await selectedClassesCollection.insertOne(selectedClass);
-        res.send(result);
-    })
+        // payment related api
+        app.post('/payments', async(req, res) => {
+            const payment = req.body;
+            const result = await paymentCollection.insertOne(payment);
+            res.send(result);
+        })
 
 
         // Send a ping to confirm a successful connection
