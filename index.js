@@ -197,10 +197,27 @@ async function run() {
             const enrolledClassId = payment.classId;
             const result = await paymentCollection.insertOne(payment);
 
-          
+
             const filter = { _id: new ObjectId(enrolledClassId) }
             const deleteResult = await selectedClassesCollection.deleteOne(filter)
-            res.send({ result, deleteResult});
+            res.send({ result, deleteResult });
+        })
+
+        // decrease the number of available seats after payment and increase enrolled students number
+        app.put('/newClasses/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const item = await newClassesCollection.findOne(filter);
+            console.log(item);
+            const updateDoc = {
+                $inc: { 
+                    seats: -1 ,
+                    totalEnrolledStudents: +1
+                },
+            }
+            const result = await newClassesCollection.updateOne(filter, updateDoc)
+            res.send(result);
+
         })
 
 
