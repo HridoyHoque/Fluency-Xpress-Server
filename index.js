@@ -192,10 +192,15 @@ async function run() {
         })
 
         // payment related api
-        app.post('/payments', async(req, res) => {
+        app.post('/payments', async (req, res) => {
             const payment = req.body;
+            const enrolledClassId = payment.classId;
             const result = await paymentCollection.insertOne(payment);
-            res.send(result);
+
+          
+            const filter = { _id: new ObjectId(enrolledClassId) }
+            const deleteResult = await selectedClassesCollection.deleteOne(filter)
+            res.send({ result, deleteResult});
         })
 
 
