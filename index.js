@@ -9,7 +9,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-console.log(process.env.PAYMENT_SECRET_KEY)
+// console.log(process.env.PAYMENT_SECRET_KEY)
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.mucefdr.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -196,8 +196,6 @@ async function run() {
             const payment = req.body;
             const enrolledClassId = payment.classId;
             const result = await paymentCollection.insertOne(payment);
-
-
             const filter = { _id: new ObjectId(enrolledClassId) }
             const deleteResult = await selectedClassesCollection.deleteOne(filter)
             res.send({ result, deleteResult });
@@ -208,7 +206,6 @@ async function run() {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
             const item = await newClassesCollection.findOne(filter);
-            console.log(item);
             const updateDoc = {
                 $inc: { 
                     seats: -1 ,
@@ -218,6 +215,12 @@ async function run() {
             const result = await newClassesCollection.updateOne(filter, updateDoc)
             res.send(result);
 
+        })
+
+        // get the payment history of students
+        app.get('/payments', async(req, res) => {
+            const result = await paymentCollection.find().toArray()
+            res.send(result);
         })
 
 
