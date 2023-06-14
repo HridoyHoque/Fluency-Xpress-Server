@@ -13,6 +13,7 @@ app.use(express.json());
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.mucefdr.mongodb.net/?retryWrites=true&w=majority`;
 
+
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
     serverApi: {
@@ -36,23 +37,12 @@ async function run() {
             }
         });
 
-        const classesCollection = client.db('fluencyDb').collection('classes');
+       
         const newClassesCollection = client.db('fluencyDb').collection('newClasses');
         const selectedClassesCollection = client.db('fluencyDb').collection('selectedClasses');
-        const instructorsCollection = client.db('fluencyDb').collection('instructors');
         const usersCollection = client.db('fluencyDb').collection('users');
         const paymentCollection = client.db('fluencyDb').collection('payments');
 
-        // get all classes data
-        app.get('/classes', async (req, res) => {
-            const result = await classesCollection.find().toArray();
-            res.send(result);
-        });
-        // get all instructors information
-        app.get('/instructors', async (req, res) => {
-            const result = await instructorsCollection.find().toArray();
-            res.send(result);
-        });
         // get logged users data
         app.get('/users/:email', async (req, res) => {
             const email = req.params.email
